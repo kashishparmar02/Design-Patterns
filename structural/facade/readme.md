@@ -1,128 +1,141 @@
-# **Facade Pattern – Shop Management System**
+# **Facade Pattern – Multisig Wallet System**
 
-This project demonstrates the **Facade Design Pattern** through a shop management system that simplifies complex inventory operations. The pattern provides a unified interface to a set of interfaces in a subsystem, making the subsystem easier to use by hiding its complexity behind a simple facade.
+This project demonstrates the **Facade Design Pattern** through a multi-signature wallet system that simplifies complex blockchain operations. The pattern provides a unified interface to a set of interfaces in a subsystem, making it easier to use.
 
 ## **Project Structure**
 ```
 facade/
-├── ShopkeeperFacade.java               (Facade)
-├── InventorySystem.java                (Subsystem)
-├── StockItem.java                      (Subsystem Component)
-├── ShopManagerClient.java              (Client)
-└── readme.md                           (Documentation)
+├── facade/
+│   └── MultisigWalletFacade.java       (Facade)
+├── subsystems/
+│   ├── Transaction.java                (Subsystem Component)
+│   ├── SignatureService.java           (Subsystem Component)
+│   └── BlockchainService.java          (Subsystem Component)
+└── Main.java                           (Client/Demo)
 ```
 
-## **Implementation Flow**
-1. **Client (ShopManagerClient)** interacts only with the facade, never directly with subsystems
-2. **Facade (ShopkeeperFacade)** provides simple, business-oriented methods for complex operations
-3. **Subsystem (InventorySystem)** contains the complex logic for inventory management
-4. **Data Model (StockItem)** represents individual items with count and location information
-5. **Coordination** facade orchestrates multiple subsystem calls to complete high-level operations
+## **Pattern Overview**
 
-## **Pattern Benefits**
-* **Facade Pattern** simplifies client interaction with complex subsystems
-* Provides a single entry point for multiple related operations
-* Hides subsystem complexity behind a clean, business-friendly interface
-* Reduces coupling between clients and subsystem components
-* Makes the subsystem easier to use and understand for common use cases
+The Facade pattern provides a simplified interface to a complex subsystem. In this implementation:
+- **MultisigWalletFacade** acts as the facade, hiding the complexity of blockchain operations
+- **Subsystems** (Transaction, SignatureService, BlockchainService) handle the intricate details
+- **Client** interacts only with the facade, completely unaware of the underlying complexity
+- **Simplified workflow** for multi-signature transaction management
+
+## **Implementation Flow**
+1. **Facade (MultisigWalletFacade)** provides a simple interface for wallet operations
+2. **Subsystem Components** handle specific aspects of the blockchain system
+3. **Client (Main)** uses only the facade interface without knowing subsystem details
+4. **Complex operations** are orchestrated by the facade behind the scenes
+5. **Automatic workflow** manages the entire transaction lifecycle
 
 ## **Key Components**
 
-### **Facade (ShopkeeperFacade)**
-- `findAndGetItem(String itemName)` - Complete customer purchase workflow
-- `addNewItemToStock(String itemName, int initialCount, String location)` - Add new products
-- `updateItemStock(String itemName, int newCount)` - Update existing stock levels
-- **Coordinates subsystem operations** and provides user-friendly feedback
+### **Facade Layer**
 
-### **Subsystem (InventorySystem)**
-- **InventorySystem**: Complex inventory management with fine-grained operations
-- **Core Operations**:
-  - `checkStock(String itemName)` - Verify item availability
-  - `getItemLocation(String itemName)` - Find item storage location
-  - `deductStock(String itemName)` - Remove item from inventory
-  - `addNewItem()` - Create new inventory entries
-  - `updateStock()` - Modify existing stock counts
+#### **MultisigWalletFacade**
+- **Primary Interface**: Provides simplified methods for wallet operations
+- **Orchestration**: Coordinates between different subsystem components
+- **State Management**: Maintains transaction registry and status tracking
+- **Methods**:
+  - `createTransaction()` - Creates new transaction proposals
+  - `approveTransaction()` - Handles signature collection and approval
+  - `checkTransactionStatus()` - Provides transaction status information
 
-### **Data Model (StockItem)**
-- **StockItem**: Encapsulates item information (count, location)
-- **Immutable location** once item is created
-- **Mutable count** for stock level management
+### **Subsystem Components**
 
-### **Client (ShopManagerClient)**
-- Uses only the facade interface for all shop operations
-- **No direct subsystem access** - maintains clean separation
-- **Simple method calls** for complex business operations
-- **Demonstrates various scenarios**: purchases, stock management, new products
+#### **Transaction**
+- **Data Model**: Represents multi-signature transaction proposals
+- **State Tracking**: Manages signature collection and approval status
+- **Validation**: Ensures transaction integrity and completion criteria
+- **Methods**: `addSignature()`, `isApproved()`, getters for transaction details
+
+#### **SignatureService**
+- **Cryptographic Operations**: Handles digital signature creation and validation
+- **Security Layer**: Manages the complex cryptographic processes
+- **Integration**: Works with Transaction objects to add signatures
+
+#### **BlockchainService**
+- **Network Communication**: Handles broadcasting to blockchain networks
+- **Transaction Finalization**: Manages the final step of transaction processing
+- **External Integration**: Interfaces with blockchain infrastructure
+
+## **Pattern Benefits**
+
+### **Simplified Interface**
+- Complex multi-signature workflow reduced to simple method calls
+- Client code doesn't need to understand blockchain intricacies
+- Easy to use for developers unfamiliar with blockchain technology
+
+### **Decoupling**
+- Client is completely decoupled from subsystem implementations
+- Changes to subsystem components don't affect client code
+- Subsystems can be modified or replaced without client impact
+
+### **Encapsulation**
+- Complex operations are hidden behind a simple interface
+- Internal workflow orchestration is abstracted away
+- Error handling and validation are centralized in the facade
+
+### **Maintainability**
+- Single point of control for complex operations
+- Easier to debug and modify system behavior
+- Clear separation between client interface and implementation details
+
+## **Usage Examples**
+
+### **Creating a Transaction**
+```java
+MultisigWalletFacade wallet = new MultisigWalletFacade();
+wallet.createTransaction("tx-001", "0xRecipientAddress", 50.0, 3);
+```
+
+### **Approving Transactions**
+```java
+wallet.approveTransaction("tx-001", "User-A");
+wallet.approveTransaction("tx-001", "User-B");
+wallet.approveTransaction("tx-001", "User-C"); // Triggers automatic broadcast
+```
+
+### **Checking Status**
+```java
+wallet.checkTransactionStatus("tx-001");
+```
 
 ## **Running the Demo**
+
+### **Compile**
 ```bash
-# Navigate to parent directory of facade folder
+# Navigate to project root
 cd structural
 
 # Compile all files
-javac facade/*.java
-
-# Run demo
-java structural.facade.ShopManagerClient
+javac facade/*.java facade/facade/*.java facade/subsystems/*.java
 ```
 
-The demo demonstrates:
-- **Customer purchase**: Stock checking → location finding → inventory deduction
-- **Out of stock handling**: Graceful failure when items unavailable
-- **New product addition**: Adding items with initial stock and location
-- **Stock updates**: Modifying quantities for existing products
-- **Complex coordination**: Multiple subsystem operations per facade call
-
-## **Operation Complexity Comparison**
-
-### **Without Facade (Direct Subsystem Access)**
-```java
-// Complex client code required:
-InventorySystem inventory = new InventorySystem();
-if (inventory.checkStock("Parker Pen")) {
-    String location = inventory.getItemLocation("Parker Pen");
-    System.out.println("Getting item from: " + location);
-    inventory.deductStock("Parker Pen");
-    System.out.println("Purchase complete");
-} else {
-    System.out.println("Item out of stock");
-}
+### **Run**
+```bash
+java structural.facade.Main
 ```
-
-### **With Facade (Simplified Interface)**
-```java
-// Simple client code:
-ShopkeeperFacade shopkeeper = new ShopkeeperFacade();
-shopkeeper.findAndGetItem("Parker Pen");  // Handles all complexity internally
-```
-
-## **Subsystem Coordination**
-Each facade method orchestrates multiple subsystem operations:
-
-### **Customer Purchase Flow**
-1. **Stock Check**: Verify item availability in inventory
-2. **Location Lookup**: Find where item is stored in shop
-3. **User Feedback**: Inform about item retrieval process
-4. **Inventory Update**: Deduct item from stock count
-5. **Completion**: Confirm successful purchase
-
-### **Stock Management Flow**
-1. **Validation**: Check if operations are valid
-2. **Inventory Update**: Modify stock levels or add new items
-3. **Feedback**: Provide confirmation of successful operations
-4. **Error Handling**: Graceful handling of invalid operations
-
-## **Pattern Advantages Demonstrated**
-* **Simplified Client Code**: One method call replaces multiple subsystem interactions
-* **Business-Oriented Interface**: Methods named for business operations, not technical details
-* **Error Handling**: Facade manages edge cases and provides user-friendly messages
-* **Subsystem Evolution**: Inventory system can change without affecting clients
-* **Reduced Coupling**: Clients depend only on facade, not on subsystem classes
 
 ## **Real-World Applications**
-* **E-commerce Systems**: Order processing facades hiding payment, inventory, and shipping subsystems
-* **Banking APIs**: Account management facades simplifying complex financial operations
-* **Media Players**: Playback controls hiding complex audio/video processing subsystems
-* **Database Frameworks**: ORM facades simplifying complex SQL operations and connection management
-* **Web Service APIs**: REST facades providing simple interfaces to complex business logic
-* **Operating System APIs**: System call facades hiding low-level hardware and kernel operations 
+
+### **Financial Systems**
+- **Banking APIs**: Simplifying complex banking operations for mobile apps
+- **Payment Gateways**: Unified interface for multiple payment processors
+- **Trading Platforms**: Simplified interface for complex trading operations
+
+### **System Integration**
+- **Database Facades**: Hiding complexity of multiple database systems
+- **API Wrappers**: Simplifying third-party service integrations
+- **Legacy System Integration**: Providing modern interfaces to old systems
+
+### **User Interfaces**
+- **GUI Frameworks**: Simplifying complex UI operations
+- **Game Engines**: Hiding rendering and physics complexity
+- **Web Frameworks**: Abstracting HTTP and routing complexity
+
+### **Enterprise Applications**
+- **CRM Systems**: Simplifying customer relationship management
+- **ERP Integration**: Unified interface for enterprise resource planning
+- **Workflow Management**: Orchestrating complex business processes

@@ -1,3 +1,5 @@
+package creational.singleton;
+
 /**
  * Singleton Pattern Demonstration
  * 
